@@ -2,7 +2,9 @@
 .idea/*
 build/*
 dist/*
+data/db/*
 
 *.log
 *.pyc
 *.pyo
+*.lock

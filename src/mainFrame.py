@@ -1,16 +1,16 @@
 """
-main.py
+mainFrame.py
 class MainFrame(Frame)
 func start()
 
 Starts the main Frame that holds everything for moderating/handling calls
 and dispatching and modifying vehicles and calls.
 """
-from fasteners import version as fastenersV
-import fasteners
+from fasteners import version as fastenersv
+import sys
 import wx
 import platform
-import time
+from src.Auth import authPanel
 
 
 class MainFrame(wx.Frame):
@@ -18,12 +18,13 @@ class MainFrame(wx.Frame):
     A Frame that will hold main interface in future
     """
 
-    def __init__(self, system, *args, **kw, ):
+    def __init__(self, system, app, *args, **kw, ):
         super(MainFrame, self).__init__(*args, **kw)
         pnl = wx.Panel(self)
         self.system = system
-        self.system.logger.log("Building windows...", caller="MainFrame")
-        self.SetIcon(wx.Icon("data/icon.ico"))
+        self.app = app
+        self.system.logger.debug("Building MainFrame...", caller="MainFrame")
+        self.SetIcon(wx.Icon(self.system.resource_path("data/icon.ico")))
 
         st = wx.StaticText(pnl, label="Hi There !", pos=(25, 25))  # 25,25 for slight padding.
         font = st.GetFont()
@@ -35,8 +36,22 @@ class MainFrame(wx.Frame):
         self.makemenubar()
 
         # and a status bar
-        # self.CreateStatusBar()
-        # self.SetStatusText("999 - Computer Aided Dispatch Simulator v0.0.1 Development Build")
+        self.CreateStatusBar()
+        self.SetStatusText("999 - Computer Aided Dispatch Simulator v0.0.1 Development Build")
+
+        self.Hide()
+        # Ask user to login
+        system.logger.debug("Constructing authPanel", caller="MainFrame")
+        dlg = authPanel.LoginPanel(system)
+        dlg.ShowModal()
+        system.logger.debug("authPanel destroyed, checking details...", caller="MainFrame")
+        authenticated = dlg.logged_in
+        if not authenticated:
+            system.logger.log("Failed authentication, shutting down.", caller="MainFrame")
+            sys.exit(0)
+
+        system.logger.log("Displaying MainFrame, call simulator starting in x seconds...", caller="MainFrame")
+        self.Show()
 
     def makemenubar(self):
         filemenu = wx.Menu()
@@ -65,10 +80,17 @@ class MainFrame(wx.Frame):
 
     def onexit(self, event):
         """Close the frame, terminating the application."""
+        self.system.logger.log("Logging out...", caller="MainFrame")
         self.Hide()
-        time.sleep(5)
+        self.system.logger.debug("Constructing authPanel", caller="MainFrame")
+        dlg = authPanel.LoginPanel(self.system)
+        dlg.ShowModal()
+        self.system.logger.debug("authPanel destroyed, checking details...", caller="MainFrame")
+        authenticated = dlg.logged_in
+        if not authenticated:
+            self.system.logger.log("Failed authentication, shutting down.", caller="MainFrame")
+            sys.exit(0)
         self.Show()
-        # self.Close(True)
 
     @staticmethod
     def onhello(event):
@@ -82,7 +104,7 @@ class MainFrame(wx.Frame):
                       "Developers - Jackthehack21\n"
                       "Icon - http://www.ipharmd.net/symbol/star_of_life/emergency_medicine_blue.html\n\n"
                       "Dependencies - Python@"+platform.python_version()+", wxPython@"+wx.__version__+", "
-                      "fasteners@"+fastenersV.version_string(),
+                      "fasteners@"+fastenersv.version_string(),
                       "999-CAD Simulator Credits", wx.OK | wx.ICON_INFORMATION)
 
     @staticmethod
@@ -94,8 +116,8 @@ class MainFrame(wx.Frame):
 
 
 def start(system):
-    system.logger.log("Constructing Main Window...")
+    system.logger.debug("Constructing Main Window...")
     app = wx.App(False)
-    frm = MainFrame(system, None, title='999 - Computer Aided Dispatch Simulator')
+    frm = MainFrame(system, app, None, title='999 - Computer Aided Dispatch Simulator')
     frm.Show()
     app.MainLoop()
