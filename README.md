@@ -16,6 +16,11 @@ The central idea is that persons in a dispatch center are able to easily view an
 
 CAD provides displays and tools so that the dispatcher has an opportunity to handle calls-for-service as efficiently as possible.
 
+### Dependencies:
+- [Python@3.7.3](https://www.python.org/) : Main language used for whole program.
+- [Wxpython@4.0.6](https://pypi.org/project/wxPython/4.0.6/) : Main wrapper for all GUI you see.
+- [Fasteners@0.15.0](https://pypi.org/project/fasteners/0.15/) : Allows file locking on Windows (used to stop multiple process's that corrupt data)
+- [PyInstaller@3.4.0](https://pypi.org/project/pyinstaller/3.4/) : Cross platform compile to one file for deployment
 ### Links
 - https://en.wikipedia.org/wiki/Computer-aided_dispatch - Definitions used throughout project
 - http://www.radsoftware.org/html/911cad.html - Inspiration

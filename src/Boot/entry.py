@@ -8,8 +8,8 @@ import sys
 import time
 
 import fasteners
-from src import mainFrame
-from src import system as systemc
+from src.Graphics import mainFrame
+from src.Boot import system as systemc
 from colorama import initialise
 import os
 initialise.init(False)  # Thanks, this now allows colour and other cool things on windows :)
@@ -26,6 +26,7 @@ def start():
 
     if not os.path.exists('data'):
         os.makedirs('data')
+        # todo run intial run sequence, displays guide PDF, and default user details to log in. (once user management is complete)
 
     system = systemc.System()
     # system.logger.debug("Test debug")

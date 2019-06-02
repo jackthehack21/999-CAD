@@ -30,11 +30,11 @@ class Handler:
         create = "CREATE TABLE IF NOT EXISTS users (id integer PRIMARY KEY, " \
                  "username text NOT NULL, password text NOT NULL, perm integer NOT NULL)"  # todo multiple permissions.
         self.cursor.execute(create)
-        self.system.logger.debug("Table users created in db.", caller="AuthHandler")
+        self.system.logger.debug("Table users created in db, Creating default values.", caller="AuthHandler")
 
-        # sql = 'INSERT INTO users(id,username,password,perm) values(?,?,?,?)'
-        # self.cursor.execute(sql, (1, "Jackthehack21", "Password", 2))
-        # self.connection.commit()
+        sql = 'INSERT OR IGNORE INTO users(id,username,password,perm) values(?,?,?,?)'
+        self.cursor.execute(sql, (1, "Username123", "Password123", 2))
+        self.connection.commit()
 
     def verify(self, username, password):
         if self.cursor is None:

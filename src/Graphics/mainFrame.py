@@ -20,17 +20,19 @@ class MainFrame(wx.Frame):
 
     def __init__(self, system, app, *args, **kw, ):
         super(MainFrame, self).__init__(*args, **kw)
-        pnl = wx.Panel(self)
+        self.panel = wx.Panel(self)
         self.system = system
         self.app = app
         self.system.logger.debug("Building MainFrame...", caller="MainFrame")
         self.SetIcon(wx.Icon(self.system.resource_path("data/icon.ico")))
 
-        st = wx.StaticText(pnl, label="Hi There !", pos=(25, 25))  # 25,25 for slight padding.
+        st = wx.StaticText(self.panel, label="Hi There !", pos=(25, 25))  # 25,25 for slight padding.
         font = st.GetFont()
         font.PointSize += 10
         font = font.Bold()
         st.SetFont(font)
+
+        self.panel.Bind(wx.EVT_KEY_UP, self.onkey)
 
         # create a menu bar
         self.makemenubar()
@@ -50,20 +52,34 @@ class MainFrame(wx.Frame):
             system.logger.log("Failed authentication, shutting down.", caller="MainFrame")
             sys.exit(0)
 
-        system.logger.log("Displaying MainFrame, call simulator starting in x seconds...", caller="MainFrame")
+        self.SetTitle("999 - CADS: "+system.user+" - Main Menu")
+
+        system.logger.log("Displaying MainFrame to user.", caller="MainFrame")
         self.Show()
+        self.Maximize()
+        self.ShowFullScreen(True)
+
+    def onkey(self, event):
+        """ Handles shortcuts such as F11 for fullscreen. """
+        if event.GetKeyCode() == wx.WXK_F11:
+            if self.IsFullScreen():
+                self.ShowFullScreen(False)
+            else:
+                self.ShowFullScreen(True)
+        else:
+            event.Skip()
 
     def makemenubar(self):
         filemenu = wx.Menu()
-        # The "\t..." syntax defines an accelerator key that also triggers
-        # the same event
-        helloitem = filemenu.Append(-1, "&Hello...\tCtrl-H", "Help string shown in status bar for this menu item.")
+        newitem = filemenu.Append(-1, "&New...\tCtrl-N", "Create/Open new database, refreshes calls/units/history.")
         filemenu.AppendSeparator()
-        exititem = filemenu.Append(wx.ID_EXIT, "&Logout\tCtrl-Q", "Logout of the interface.")
+        logoutitem = filemenu.Append(-1, "&Logout\tCtrl-L", "Logout of the interface.")
+        exititem = filemenu.Append(wx.ID_EXIT, "&Exit\tCtrl-Q", "Exit the program completely.")
 
         helpmenu = wx.Menu()
         aboutitem = helpmenu.Append(wx.ID_ABOUT, "&About\tCtrl-A", "About the app/dependencies and their version.")
-        creditsitem = helpmenu.Append(-1, "&Credits", "Display the list of people/links that helped make this possible.")
+        creditsitem = helpmenu.Append(-1, "&Credits", "Display the list of people/links "
+                                          "that helped make this possible.")
 
         # Make the menu bar and add the two menus to it. The '&' defines
         # that the next letter is the "mnemonic" for the menu item. On the
@@ -73,14 +89,23 @@ class MainFrame(wx.Frame):
         menubar.Append(filemenu, "&File")
         menubar.Append(helpmenu, "&Help")
         self.SetMenuBar(menubar)
-        self.Bind(wx.EVT_MENU, self.onhello, helloitem)
-        self.Bind(wx.EVT_MENU, self.onexit,  exititem)
+        self.Bind(wx.EVT_MENU, self.onnew, newitem)
+        self.Bind(wx.EVT_MENU, self.onlogout, logoutitem)
+        self.Bind(wx.EVT_MENU, self.onexit, exititem)
         self.Bind(wx.EVT_MENU, self.onabout, aboutitem)
         self.Bind(wx.EVT_MENU, self.oncredits, creditsitem)
 
+    # noinspection PyUnusedLocal
     def onexit(self, event):
+        """Close the MainFrame, hence terminating program (and MainLoop)"""
+        self.system.logger.log("Destroying MainFrame...", caller="MainFrame")
+        self.Destroy()
+
+    # noinspection PyUnusedLocal
+    def onlogout(self, event):
         """Close the frame, terminating the application."""
         self.system.logger.log("Logging out...", caller="MainFrame")
+        self.SetTitle("999 - Computer Aided Dispatch Simulator")
         self.Hide()
         self.system.logger.debug("Constructing authPanel", caller="MainFrame")
         dlg = authPanel.LoginPanel(self.system)
@@ -90,13 +115,16 @@ class MainFrame(wx.Frame):
         if not authenticated:
             self.system.logger.log("Failed authentication, shutting down.", caller="MainFrame")
             sys.exit(0)
+        self.SetTitle("999 - CADS: " + self.system.user + " - Main Menu")
         self.Show()
 
+    # noinspection PyUnusedLocal
     @staticmethod
-    def onhello(event):
+    def onnew(event):
         """Say hello to the user."""
-        wx.MessageBox("Hi there from Jaxk")
+        wx.MessageBox("Coming soon, (todo dataManager)")
 
+    # noinspection PyUnusedLocal
     @staticmethod
     def oncredits(event):
         """Displays info box about credits."""
@@ -104,9 +132,10 @@ class MainFrame(wx.Frame):
                       "Developers - Jackthehack21\n"
                       "Icon - http://www.ipharmd.net/symbol/star_of_life/emergency_medicine_blue.html\n\n"
                       "Dependencies - Python@"+platform.python_version()+", wxPython@"+wx.__version__+", "
-                      "fasteners@"+fastenersv.version_string(),
+                      "fasteners@"+fastenersv.version_string()+", pyinstaller@3.4.0",
                       "999-CAD Simulator Credits", wx.OK | wx.ICON_INFORMATION)
 
+    # noinspection PyUnusedLocal
     @staticmethod
     def onabout(event):
         """Display an About Dialog"""

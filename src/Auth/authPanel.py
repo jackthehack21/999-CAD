@@ -5,7 +5,6 @@ class LoginPanel(wx.Dialog)
 GUI for Authentication/Login
 """
 import wx
-import time
 
 
 class LoginPanel(wx.Dialog):
@@ -15,7 +14,7 @@ class LoginPanel(wx.Dialog):
 
     # ----------------------------------------------------------------------
     def __init__(self, system):
-        wx.Dialog.__init__(self, None, title="999-CAD Login", size=(220, 220))
+        wx.Dialog.__init__(self, None, title="999 - CADS Authentication", size=(220, 200))
         self.system = system
         self.logged_in = False
 
@@ -49,27 +48,9 @@ class LoginPanel(wx.Dialog):
         main_sizer.Add(btn, 0, wx.ALL | wx.CENTER, 5)
 
         self.SetSizer(main_sizer)
-
-    def ShowMessage1(self, event):
-        dial = wx.MessageDialog(None, 'Download completed', 'Info', wx.OK)
-        dial.ShowModal()
-
-    def ShowMessage2(self, event):
-        dial = wx.MessageDialog(None, 'Error loading file', 'Error',
-                                wx.OK | wx.ICON_ERROR)
-        dial.ShowModal()
-
-    def ShowMessage3(self, event):
-        dial = wx.MessageDialog(None, 'Are you sure to quit?', 'Question',
-                                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        dial.ShowModal()
-
-    def ShowMessage4(self, event):
-        dial = wx.MessageDialog(None, 'Unallowed operation', 'Exclamation',
-                                wx.OK | wx.ICON_EXCLAMATION)
-        dial.ShowModal()
-
     # ----------------------------------------------------------------------
+
+    # noinspection PyUnusedLocal
     def onlogin(self, event):
         """
         Check credentials and login
@@ -79,17 +60,19 @@ class LoginPanel(wx.Dialog):
         if self.system.authHandler.verify(username, password):
             self.system.logger.log("Logged in as", username, caller="AuthPanel")
             self.logged_in = True
-            self.ShowNotice(username)
+            self.shownotice(username)
             self.Destroy()
         else:
             self.system.logger.debug("Authentication failed.", caller="AuthPanel")
-            self.ShowWarning()
+            self.showwarning()
 
-    def ShowNotice(self, username):
+    @staticmethod
+    def shownotice(username):
         dial = wx.MessageDialog(None, 'Welcome back '+username, 'Authentication Success !', wx.OK)
         dial.ShowModal()
 
-    def ShowWarning(self):
+    @staticmethod
+    def showwarning():
         dial = wx.MessageDialog(None, 'Username/Password incorrect, please try again.', 'Authentication failed !',
                                 wx.OK | wx.ICON_EXCLAMATION)
         dial.ShowModal()

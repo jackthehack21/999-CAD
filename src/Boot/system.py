@@ -6,7 +6,7 @@ A class that holds reference to all useful classes such as logger, version, hand
 """
 import os
 import sys
-from src import logger
+from src.Utils import logger
 from src.Auth import authHandler
 
 
